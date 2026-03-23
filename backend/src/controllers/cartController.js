@@ -1,14 +1,26 @@
 const cartModel = require("../models/cartModel");
 
-exports.getCart = async (req, res) => {
-  const data = await cartModel.getCart(req.user.id);
-  res.json(data);
+const getCart = async (req, res) => {
+  try {
+    const data = await cartModel.getCart(req.user.id);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi lấy giỏ hàng" });
+  }
 };
 
-exports.addToCart = async (req, res) => {
-  const { productId } = req.body;
+const addToCart = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    await cartModel.addItem(req.user.id, productId);
+    res.json({ message: "Đã thêm vào giỏ" });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi thêm vào giỏ" });
+  }
+};
 
-  await cartModel.addItem(req.user.id, productId);
-
-  res.json({ message: "Đã thêm vào giỏ" });
+// Đảm bảo export đúng như thế này
+module.exports = {
+  getCart,
+  addToCart,
 };

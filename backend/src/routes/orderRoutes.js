@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const order = require("../controllers/orderController");
-const auth = require("../middleware/auth");
+const orderController = require("../controllers/orderController"); // Đổi tên từ 'order' thành 'orderController' cho rõ ràng
+const { protect } = require("../middleware/auth"); // ✅ Lấy đúng hàm protect ra
 
-router.post("/checkout", auth, order.checkout);
+// Sửa dòng số 6:
+router.post("/checkout", protect, orderController.checkout);
 
 module.exports = router;

@@ -1,16 +1,30 @@
 const jwt = require("jsonwebtoken");
-const SECRET = "123456";
 
-module.exports = (req, res, next) => {
-  const token = req.headers.authorization;
-
-  if (!token) return res.status(401).json({ message: "No token" });
+// Middleware xác thực Token (để biết ai đang đăng nhập)
+const protect = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token)
+    return res.status(401).json({ message: "Không có quyền truy cập" });
 
   try {
-    const decoded = jwt.verify(token, SECRET);
+    // ✅ Dùng chung 1 nguồn JWT_SECRET từ .env
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
-  } catch {
-    res.status(401).json({ message: "Token không hợp lệ" });
+  } catch (error) {
+    res.status(401).json({ message: "Token không hợp lệ hoặc đã hết hạn" });
   }
 };
+
+// Middleware kiểm tra quyền ADMIN
+const adminOnly = (req, res, next) => {
+  if (req.user && req.user.role === "ADMIN") {
+    next(); // Nếu là ADMIN thì cho đi tiếp
+  } else {
+    res
+      .status(403)
+      .json({ message: "Chỉ ADMIN mới có quyền thực hiện hành động này" });
+  }
+};
+
+module.exports = { protect, adminOnly };

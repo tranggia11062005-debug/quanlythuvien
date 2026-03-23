@@ -6,5 +6,13 @@ const db = mysql.createPool({
   password: "Agia123456789@",
   database: "QuanLyBanSach",
 });
+db.getConnection()
+  .then((connection) => {
+    console.log("✅ Kết nối Database thành công!");
+    connection.release();
+  })
+  .catch((err) => {
+    console.error("❌ Kết nối Database thất bại:", err.message);
+  });
 
 module.exports = db;
