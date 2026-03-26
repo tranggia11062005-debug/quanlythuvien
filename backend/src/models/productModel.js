@@ -28,6 +28,22 @@ const Product = {
     `;
     return db.query(sql);
   },
+  getDeletedBooks: () => {
+    return db.query(`
+      SELECT p.id, p.name AS title, p.image, b.author 
+      FROM products p 
+      INNER JOIN books b ON p.id = b.product_id 
+      WHERE p.is_deleted = 1
+    `);
+  },
+
+  restore: (ids) => {
+    // Đảm bảo ids là mảng, nếu chỉ có 1 ID đơn lẻ thì bọc nó lại
+    const queryIds = Array.isArray(ids) ? ids : [ids];
+    return db.query("UPDATE products SET is_deleted = 0 WHERE id IN (?)", [
+      queryIds,
+    ]);
+  },
 }; // ✅ Đóng ngoặc ở cuối cùng này
 
 module.exports = Product;

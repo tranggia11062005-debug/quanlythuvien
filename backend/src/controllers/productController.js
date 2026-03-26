@@ -50,7 +50,9 @@ const createProduct = async (req, res) => {
       tags,
     } = req.body;
 
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    const image = req.file
+      ? `http://localhost:8080/uploads/${req.file.filename}`
+      : null;
 
     await conn.beginTransaction();
 
@@ -97,7 +99,44 @@ const updateProduct = async (req, res) => {
   res.json({ msg: "Chưa viết logic sửa" });
 };
 const deleteProduct = async (req, res) => {
-  res.json({ msg: "Chưa viết logic xóa" });
+  const { ids } = req.body; // Client gửi lên mảng ID: [1, 2, 5]
+
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: "Không có sản phẩm nào được chọn" });
+  }
+
+  try {
+    // Cập nhật is_deleted = 1 cho tất cả ID trong mảng
+    const [result] = await db.query(
+      "UPDATE products SET is_deleted = 1 WHERE id IN (?)",
+      [ids],
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Đã chuyển ${result.affectedRows} sản phẩm vào thùng rác`,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi DB", error: err.message });
+  }
+};
+const getTrashBooks = async (req, res) => {
+  try {
+    const [rows] = await Product.getDeletedBooks();
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi lấy thùng rác", error: err.message });
+  }
+};
+
+const restoreProducts = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    await Product.restore(ids);
+    res.status(200).json({ success: true, message: "Khôi phục thành công!" });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi khôi phục", error: err.message });
+  }
 };
 module.exports = {
   getAllProducts,
@@ -106,4 +145,6 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  getTrashBooks,
+  restoreProducts,
 };

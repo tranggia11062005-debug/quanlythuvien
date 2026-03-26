@@ -13,13 +13,20 @@ console.log("JWT_SECRET từ .env:", process.env.JWT_SECRET);
 console.log("DB_NAME từ .env:", process.env.DB_NAME);
 console.log("--------------------------------");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
+app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/order", require("./routes/orderRoutes"));
+app.use("/api/categories", require("./routes/categoryRoutes"));
 // app.get("/api/products", productController.getAllProducts);
 // app.get("/api/products/:id", productController.getProductById);
 

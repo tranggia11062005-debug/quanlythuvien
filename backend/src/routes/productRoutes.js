@@ -12,6 +12,17 @@ router.get(
   adminOnly,
   productController.getAllAdminBooks,
 );
+
+router.get("/admin/trash", protect, adminOnly, productController.getTrashBooks);
+
+router.patch(
+  "/delete-multiple",
+  protect,
+  adminOnly,
+  productController.deleteProduct,
+);
+
+router.patch("/restore", protect, adminOnly, productController.restoreProducts);
 // Route chuẩn
 router.post(
   "/",
